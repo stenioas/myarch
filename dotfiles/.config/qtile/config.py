@@ -165,15 +165,15 @@ extension_defaults = widget_defaults.copy()
 
 screens = [
     Screen(
-        bottom=bar.Bar(
+        top=bar.Bar(
             [
                 widget.TextBox(
                     font = 'TerminessTTF Nerd Font',
                     fontsize = 18,
-                    padding = 8,
+                    padding = 10,
                     text='\uf303',
                     foreground = colors[1],
-                    mouse_callbacks = {'Button1': lambda qtile: qtile.cmd_spawn('dmenu')},
+                    #mouse_callbacks = {'Button1': lambda qtile: qtile.cmd_spawn('dmenu')},
                 ),
                 widget.GroupBox(
                     font = 'Font Awesome 5 Free Solid',
@@ -427,11 +427,11 @@ screens = [
             ],
             24,
             opacity = 0.85,
-            margin = [3,0,0,0],
+            margin = [0,0,3,0],
         ),
         left = bar.Gap(3),
         right = bar.Gap(3),
-        top = bar.Gap(3),
+        bottom = bar.Gap(3),
     ),
 ]
 
