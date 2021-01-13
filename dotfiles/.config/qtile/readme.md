@@ -5,9 +5,14 @@
 - python-psutil
 - python-dateutil
 - python-iwlib
+- ttf-font-awesome
+- terminus-font
 
 ### Instale as dependências com o comando abaixo:
-    sudo pacman -S python-psutil python-dateutil python-iwlib
+    sudo pacman -S python-psutil python-dateutil python-iwlib ttf-font-awesome terminus-font
+
+### Terminess Nerd Font
+<a href="https://www.nerdfonts.com/font-downloads">
 
 ---
 
