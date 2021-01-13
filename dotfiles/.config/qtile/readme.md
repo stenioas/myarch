@@ -13,7 +13,7 @@
 
 ### Uma Nerd Font é necessária para alguns ícones
 Eu utilizei a **Terminess Nerd Font**.
-<a href="https://www.nerdfonts.com/font-downloads">Baixar Nerd Font</a>
+<a href="https://www.nerdfonts.com/font-downloads" target="_blank">Baixar Nerd Font</a>
 
 ---
 
