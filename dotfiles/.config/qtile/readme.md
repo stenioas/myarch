@@ -11,7 +11,8 @@
 ### Instale as dependências com o comando abaixo:
     sudo pacman -S python-psutil python-dateutil python-iwlib ttf-font-awesome terminus-font
 
-### Terminess Nerd Font
+### Uma Nerd Font é necessária para alguns ícones
+Eu utilizei a **Terminess Nerd Font**.
 <a href="https://www.nerdfonts.com/font-downloads">Baixar Nerd Font</a>
 
 ---
