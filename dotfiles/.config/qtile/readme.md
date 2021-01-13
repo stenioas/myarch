@@ -6,4 +6,4 @@
 - python-dateutil
 - python-iwlib
 
-		sudo pacman -S python-psutil python-dateutil python-iwlib
+	sudo pacman -S python-psutil python-dateutil python-iwlib
