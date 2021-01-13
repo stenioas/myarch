@@ -12,7 +12,7 @@
     sudo pacman -S python-psutil python-dateutil python-iwlib ttf-font-awesome terminus-font
 
 ### Terminess Nerd Font
-<a href="https://www.nerdfonts.com/font-downloads">
+<a href="https://www.nerdfonts.com/font-downloads">Baixar Nerd Font</a>
 
 ---
 
