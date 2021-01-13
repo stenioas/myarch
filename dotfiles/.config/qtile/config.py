@@ -170,7 +170,7 @@ screens = [
                 widget.TextBox(
                     font = 'TerminessTTF Nerd Font',
                     fontsize = 18,
-                    padding = 10,
+                    padding = 12,
                     text='\uf303',
                     foreground = colors[1],
                     #mouse_callbacks = {'Button1': lambda qtile: qtile.cmd_spawn('dmenu')},
