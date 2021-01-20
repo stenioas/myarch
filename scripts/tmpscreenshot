@@ -1,0 +1,3 @@
+#!/bin/sh
+
+scrot -q 100 /tmp/tmpscreenshot.png -e 'xclip -selection clipboard -target image/png -i $f'

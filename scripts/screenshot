@@ -1,0 +1,3 @@
+#!/bin/sh
+
+scrot -qb 100 "'$HOME'/Imagens/screenshot-%d%m%Y-%H%M%S.png"
