@@ -26,6 +26,8 @@
 
 import os
 import subprocess
+from time import time
+from pathlib import Path
 from typing import List  # noqa: F401
 
 from libqtile import bar, layout, widget, hook
@@ -33,47 +35,63 @@ from libqtile.config import Click, Drag, Group, Key, Screen
 from libqtile.lazy import lazy
 
 mod = "mod4"
-terminal = "xfce4-terminal"
+terminal = "alacritty"
+my_home = os.path.expanduser('~/')
+my_config = my_home + ".config/qtile/"
+
+def screenshot(save=True, copy=True, mode="full"):
+    def f(qtile):
+        path = Path.home() / 'Imagens'
+        path /= f'screenshot_{str(int(time() * 100))}.png'
+        
+        if mode == "full":
+            shot = subprocess.run(['maim'], stdout=subprocess.PIPE)
+        elif mode == 'select':
+            shot = subprocess.run(['maim', '-s'], stdout=subprocess.PIPE)
+        elif mode == 'window':
+            window = subprocess.run(['xdotool', 'getactivewindow'], stdout=subprocess.PIPE)
+            shot = subprocess.run(['maim', '-i', window.stdout], stdout=subprocess.PIPE)
+
+        if save:
+            with open(path, 'wb') as sc:
+                sc.write(shot.stdout)
+
+        if copy:
+            subprocess.run(['xclip', '-selection', 'clipboard', '-t', 'image/png'], input=shot.stdout)
+
+    return f
 
 keys = [
-    # Switch between windows in current stack pane
     Key([mod], "k", lazy.layout.down(),
         desc="Move focus down in stack pane"),
     Key([mod], "j", lazy.layout.up(),
         desc="Move focus up in stack pane"),
-
-    # Move windows up or down in current stack
     Key([mod, "control"], "k", lazy.layout.shuffle_down(),
         desc="Move window down in current stack "),
     Key([mod, "control"], "j", lazy.layout.shuffle_up(),
         desc="Move window up in current stack "),
-
-    # Switch window focus to other pane(s) of stack
     Key([mod], "space", lazy.layout.next(),
         desc="Switch window focus to other pane(s) of stack"),
-
-    # Swap panes of split stack
     Key([mod, "shift"], "space", lazy.layout.rotate(),
         desc="Swap panes of split stack"),
-
-    # Toggle between split and unsplit sides of stack.
-    # Split = all windows displayed
-    # Unsplit = 1 window displayed, like Max layout, but still with
-    # multiple stack panes
     Key([mod, "shift"], "Return", lazy.layout.toggle_split(),
         desc="Toggle between split and unsplit sides of stack"),
     Key([mod], "Return", lazy.spawn(terminal), desc="Launch terminal"),
-
-    # Toggle between different layouts as defined below
     Key([mod], "Tab", lazy.next_layout(), desc="Toggle between layouts"),
+    Key([mod, "shift"], "Tab", lazy.prev_layout(), desc="Toggle between layouts"),
     Key([mod], "w", lazy.window.kill(), desc="Kill focused window"),
-
     Key([mod, "control"], "r", lazy.restart(), desc="Restart qtile"),
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown qtile"),
     Key([mod], "r", lazy.spawncmd(),
         desc="Spawn a command using a prompt widget"),
 
     ### MY KEYS ###
+    Key([mod], "m", lazy.window.toggle_floating(), desc="Floating window"),
+    
+    Key([], "Print", lazy.function(screenshot())),
+    Key([mod], "Print", lazy.function(screenshot(mode='select'))),
+    Key([mod, "shift"], "Print", lazy.function(screenshot(mode='window'))),
+    Key([mod], "d", lazy.spawn("rofi -show drun"), desc="Launch rofi"),
     Key([mod], "g", lazy.spawn("google-chrome-stable"), desc="Launch Google Chrome"),
     Key([mod], "t", lazy.spawn("telegram-desktop"), desc="Launch Telegram"),
     Key([mod], "v", lazy.spawn("vscodium"), desc="Launch Vscodium"),
@@ -95,33 +113,58 @@ colors = [
     ['#F2CD5C','#F2CD5C'], # 10
     ['#037F8C','#037F8C'], # 11
     ['#8563A6','#8563A6'], # 12
-    ['#F25C69','#F25C69'], # 13
+    ['#FA00AF','#FA00AF'], # 13
+    ['#FB0DA8','#FB0DA8'], # 14
+    ['#FB0097','#FB0097'], # 15
+    ['#FB0D90','#FB0D90'], # 16
+    ['#FB007E','#FB007E'], # 17
+    ['#FB0D78','#FB0D78'], # 18
+    ['#FB0064','#FB0064'], # 19
+    ['#FB0D60','#FB0D60'], # 20
+]
+
+d_colors = [
+    ['#413646','#413646'], #  0
+    ['#3B4A69','#3B4A69'], #  1
+    ['#847089','#847089'], #  2
+    ['#FB0097','#FB0097'], #  3
+    ['#FF00BF','#FF00BF'], #  4
+    ['#B38F8F','#B38F8F'], #  5
+    ['#826B5B','#826B5B'], #  6
+    ['#A0906F','#A0906F'], #  7
+    ['#ECB95D','#ECB95D'], #  8
+    ['#FFD09C','#FFD09C'], #  9
+    ['#FDF46B','#FDF46B'], # 10
+    ['#05FFB8','#05FFB8'], # 11
+]
+
+my_fonts = [
+    'JetBrainsMono Nerd Font',
+    'JetBrainsMono Nerd Font Mono',
+    'Terminus',
+    'TerminessTTF Nerd Font',
+    'TerminessTTF Nerd Font Mono',
+    'Font Awesome 5 Free',
+    'Font Awesome 5 Free Solid',
 ]
 
 groups = [
     Group("1",label="\uf120",layout="bsp"),
     Group("2",label="\uf121",layout="tile"),
-    Group("3",label="\uf268",layout="tile"),
-    Group("4",label="\uf3fe",layout="bsp"),
-    Group("5",label="\uf58f",layout="tile"),
+    Group("3",label="\uf268",layout="max"),
+    Group("4",label="\uf075",layout="bsp"),
+    Group("5",label="\uf1bc",layout="tile"),
     Group("6",label="\uf4b8",layout="tile"),
     Group("7",label="\uf86d",layout="tile"),
-    Group("8",label="\uf5fc",layout="tile"),
+    Group("8",label="\uf21b",layout="bsp"),
 ]
 
 for i in groups:
     keys.extend([
-        # mod1 + letter of group = switch to group
         Key([mod], i.name, lazy.group[i.name].toscreen(),
             desc="Switch to group {}".format(i.name)),
-
-        # mod1 + shift + letter of group = switch to & move focused window to group
-        Key([mod, "shift"], i.name, lazy.window.togroup(i.name, switch_group=True),
+        Key([mod, "shift"], i.name, lazy.window.togroup(i.name, switch_group=False),
             desc="Switch to & move focused window to group {}".format(i.name)),
-        # Or, use below if you prefer not to switch to that group.
-        # # mod1 + shift + letter of group = move focused window to group
-        # Key([mod, "shift"], i.name, lazy.window.togroup(i.name),
-        #     desc="move focused window to group {}".format(i.name)),
     ])
 
 layout_theme = {
@@ -157,9 +200,9 @@ layouts = [
 ]
 
 widget_defaults = dict(
-    font='Terminus',
-    fontsize=16,
-    padding=3,
+    font = my_fonts[2],
+    fontsize = 16,
+    padding = 6,
 )
 extension_defaults = widget_defaults.copy()
 
@@ -168,270 +211,204 @@ screens = [
         top=bar.Bar(
             [
                 widget.TextBox(
-                    font = 'TerminessTTF Nerd Font',
-                    fontsize = 18,
-                    padding = 12,
+                    font = my_fonts[1],
+                    fontsize = 32,
+                    background = colors[1],
+                    foreground = colors[0],
+                    markup = True,
                     text='\uf303',
-                    foreground = colors[1],
-                    #mouse_callbacks = {'Button1': lambda qtile: qtile.cmd_spawn('dmenu')},
+                    mouse_callbacks = {'Button1': lambda qtile: qtile.cmd_spawn('rofi -show drun')},
+                ),
+                widget.CurrentLayout(
+                    background = colors[2],
+                    foreground = colors[0],
                 ),
                 widget.GroupBox(
-                    font = 'Font Awesome 5 Free Solid',
+                    font = my_fonts[6],
+                    fontsize = 18,
                     rounded = True,
                     borderwidth = 0,
                     highlight_method = 'line',
-                    highlight_color = colors[1],
+                    highlight_color = colors[10],
                     block_highlight_text_color = colors[0],
-                    active = colors[1],
-                    padding = 5,
+                    active = colors[10],
+                    inactive = colors[8],
+                    disable_drag = True,
                 ),
                 widget.Prompt(
-                    foreground = colors[1],
+                    font = my_fonts[2],
+                    fontsize = 17,
+                    foreground = colors[9],
+                    cursor_color = '#FFFFFF',
                     prompt = '> ',
                 ),
                 widget.Sep(
                     foreground = colors[0],
                     linewidth = 1,
                 ),
-                widget.WindowName(
-                    empty_group_string = 'No focus',
-                    foreground = colors[2],
-                    show_state = False,
+                #widget.WindowTabs(),
+                widget.TaskList(
+                    padding = 6,
+                    margin = 0,
+                    rounded = False,
+                    border = "#413646",
+                    unfocused_border = '#1A1A1A',
+                    foreground = '#FFFFFF',
+                    highlight_method = 'block',
+                    icon_size = 0,
+                    title_width_method = 'uniform',
                 ),
+                #widget.WindowName(
+                #    font = my_fonts[2],
+                #    fontsize = 16,
+                #    empty_group_string = 'No focus',
+                #    foreground = colors[2],
+                #    show_state = False,
+                #),
                 widget.Chord(
                     chords_colors={
                         'launch': ("#ff0000", "#ffffff"),
                     },
+                    font = my_fonts[2],
+                    #fontsize = 20,
+                    fmt = 'TESTE {}',
                     name_transform=lambda name: name.upper(),
                 ),
                 widget.Systray(),
-                widget.Sep( # DISK USAGE
+                widget.Sep(
+                    linewidth = 3,
                     foreground = colors[0],
-                    linewidth = 1,
                 ),
-                widget.TextBox(
-                    font = 'Font Awesome 5 Free Solid',
-                    fontsize = 18,
-                    padding = 0,
-                    text='\ue0b2',
-                    foreground = colors[8],
-                ),
-                widget.TextBox(
-                    font = 'Font Awesome 5 Free Solid',
+                widget.TextBox( # DISK USAGE
+                    font = my_fonts[6],
+                    fontsize = 16,
+                    background = d_colors[0],
+                    foreground = colors[9],
                     text='\uf0a0',
-                    background = colors[8],
-                    foreground = colors[1],
+                    mouse_callbacks = {'Button1': lambda qtile: qtile.cmd_spawn(terminal + ' -t=float -e=ranger')},
                 ),
-                widget.DF(
-                    background = colors[8],
-                    foreground = colors[1],
+                widget.DF( # DISK USAGE
+                    background = d_colors[0],
+                    foreground = colors[9],
                     measure = 'G',
                     partition = '/',
+                    #fmt = '\uf0a0 {}',
                     format = '{r:.0f}%',
                     visible_on_warn = False,
+                    mouse_callbacks = {'Button1': lambda qtile: qtile.cmd_spawn(terminal + ' -t=float -e=ranger')},
                 ),
-                widget.TextBox(
-                    font = 'Font Awesome 5 Free Solid',
-                    fontsize = 18,
-                    padding = 0,
-                    text='\ue0b2',
-                    background = colors[8],
-                    foreground = colors[7],
-                ),
-                widget.TextBox(
-                    font = 'Font Awesome 5 Free',
+                widget.TextBox( # CPU USAGE
+                    font = my_fonts[3],
+                    #fontsize = 20,
+                    background = d_colors[1],
+                    foreground = colors[9],
                     text='\uf2db',
-                    background = colors[7],
-                    foreground = colors[1],
+                    mouse_callbacks = {'Button1': lambda qtile: qtile.cmd_spawn(terminal + ' -t=float -e=htop')},
                 ),
-                widget.CPU(
-                    background = colors[7],
-                    foreground = colors[1],
+                widget.CPU( # CPU USAGE
+                    background = d_colors[1],
+                    foreground = colors[9],
+                    #fmt = '\uf2db {}',
                     format = '{load_percent}%',
+                    mouse_callbacks = {'Button1': lambda qtile: qtile.cmd_spawn(terminal + ' -t=float -e=htop')},
                 ),
-                widget.TextBox(
-                    font = 'Font Awesome 5 Free',
-                    text='\uf76b',
-                    background = colors[7],
-                    foreground = colors[1],
+                widget.TextBox( # MEMORY USAGE
+                    font = my_fonts[3],
+                    fontsize = 20,
+                    text='\uf85a',
+                    background = d_colors[2],
+                    foreground = colors[9],
+                    mouse_callbacks = {'Button1': lambda qtile: qtile.cmd_spawn(terminal + ' -t=float -e=htop')},
                 ),
-                widget.ThermalSensor(
-                    background = colors[7],
-                    foreground = colors[1],
-                ),
-                widget.TextBox(
-                    font = 'Font Awesome 5 Free Solid',
-                    fontsize = 18,
-                    padding = 0,
-                    text='\ue0b2',
-                    background = colors[7],
-                    foreground = colors[6],
-                ),
-                widget.TextBox(
-                    font = 'Font Awesome 5 Free Solid',
-                    text='\uf538',
-                    background = colors[6],
-                    foreground = colors[1],
-                ),
-                widget.Memory(
-                    background = colors[6],
-                    foreground = colors[1],
+                widget.Memory( # MEMORY USAGE
+                    background = d_colors[2],
+                    foreground = colors[9],
                     format = '{MemUsed}MB',
+                    mouse_callbacks = {'Button1': lambda qtile: qtile.cmd_spawn(terminal + ' -t=float -e=htop')},
                 ),
-                widget.TextBox(
-                    font = 'Font Awesome 5 Free',
-                    text='\uf76b',
-                    background = colors[6],
-                    foreground = colors[1],
-                ),
-                widget.ThermalSensor(
-                    background = colors[6],
-                    foreground = colors[1],
-                    tag_sensor = 'temp1',
-                ),
-                #widget.Sep( # KEYBOARD
-                #    foreground = colors[0],
-                #    linewidth = 1,
-                #),
-                #widget.TextBox(
-                #    font = 'Font Awesome 5 Free Solid',
-                #    text='\uf11c',
-                #    background = colors[1],
-                #    foreground = colors[0],
-                #),
-                #widget.KeyboardLayout(
-                #    background = colors[1],
-                #    foreground = colors[0],
-                #    configured_keyboards = ['br', 'us'],
-                #),
-                widget.TextBox(
-                    font = 'Font Awesome 5 Free Solid',
-                    fontsize = 18,
-                    padding = 0,
-                    text='\ue0b2',
-                    background = colors[6],
-                    foreground = colors[5],
-                ),
-                widget.TextBox(
-                    font = 'Font Awesome 5 Free Solid',
+                widget.TextBox( # WLAN
+                    font = my_fonts[5],
+                    fontsize = 16,
+                    background = d_colors[5],
+                    foreground = colors[9],
                     text='\uf1eb',
-                    background = colors[5],
-                    foreground = colors[8],
+                    mouse_callbacks = {'Button1': lambda qtile: qtile.cmd_spawn(terminal + ' -t=float -e=nmtui')},
                 ),
-                widget.Wlan(
-                    background = colors[5],
-                    foreground = colors[8],
+                widget.Wlan( # WLAN
+                    background = d_colors[5],
+                    foreground = colors[9],
                     interface = 'wlp2s0',
-                    format = '{essid} {percent:2.0%}',
-                    mouse_callbacks = {'Button1': lambda qtile: qtile.cmd_spawn(terminal + ' -T=float -e=nmtui')},
+                    #fmt = '\uf1eb {}',
+                    format = '{essid}',
+                    mouse_callbacks = {'Button1': lambda qtile: qtile.cmd_spawn(terminal + ' -t=float -e=nmtui')},
                 ),
-                widget.TextBox( # NET USAGE
-                    font = 'Font Awesome 5 Free',
-                    text='\uf381',
-                    background = colors[5],
-                    foreground = colors[8],
-                ),
-                widget.Net(
-                    background = colors[5],
-                    foreground = colors[8],
-                    format = '{down}',
-                    update_interval = 2,
-                ),
-                widget.TextBox(
-                    font = 'Font Awesome 5 Free Solid',
+                widget.TextBox( # VOLUME
+                    font = my_fonts[0],
                     fontsize = 18,
-                    padding = 0,
-                    text='\ue0b2',
-                    background = colors[5],
-                    foreground = colors[4],
-                ),
-                widget.TextBox(
-                    font = 'Font Awesome 5 Free Solid',
+                    background = d_colors[7],
+                    foreground = colors[9],
                     text='\uf028',
-                    background = colors[4],
-                    foreground = colors[8],
+                    #mouse_callbacks = {'Button1': lambda qtile: qtile.cmd_spawn(terminal + ' -t=float -e=nmtui')},
                 ),
-                widget.PulseVolume(
-                    background = colors[4],
-                    foreground = colors[8],
+                widget.PulseVolume( # VOLUME
+                    background = d_colors[7],
+                    foreground = colors[9],
+                    #fmt = '\uf028 {}',
                 ),
-                widget.TextBox(
-                    font = 'Font Awesome 5 Free Solid',
-                    fontsize = 18,
-                    padding = 0,
-                    text='\ue0b2',
-                    background = colors[4],
-                    foreground = colors[3],
+                widget.TextBox( # DATE
+                    font = my_fonts[0],
+                    fontsize = 20,
+                    background = d_colors[8],
+                    foreground = colors[0],
+                    text='\uf455',
+                    #mouse_callbacks = {'Button1': lambda qtile: qtile.cmd_spawn(terminal + ' -t=float -e=nmtui')},
                 ),
-                widget.TextBox(
-                    font = 'Font Awesome 5 Free Solid',
-                    text='\uf073',
-                    background = colors[3],
-                    foreground = colors[8],
-                ),
-                widget.Clock(
-                    background = colors[3],
-                    foreground = colors[8],
+                widget.Clock( # DATE
+                    background = d_colors[8],
+                    foreground = colors[0],
+                    #fmt = '\uf073 {}',
                     format = '%a.%d.%m',
                 ),
-                widget.TextBox(
-                    font = 'Font Awesome 5 Free Solid',
-                    fontsize = 18,
-                    padding = 0,
-                    text='\ue0b2',
-                    background = colors[3],
-                    foreground = colors[2],
-                ),
-                widget.TextBox(
-                    font = 'Font Awesome 5 Free Solid',
+                widget.TextBox( # CLOCK
+                    font = my_fonts[0],
+                    fontsize = 20,
+                    background = d_colors[9],
+                    foreground = colors[0],
                     text='\uf017',
-                    background = colors[2],
-                    foreground = colors[8],
+                    #mouse_callbacks = {'Button1': lambda qtile: qtile.cmd_spawn(terminal + ' -t=float -e=nmtui')},
                 ),
-                widget.Clock(
-                    background = colors[2],
-                    foreground = colors[8],
+                widget.Clock( # CLOCK
+                    background = d_colors[9],
+                    foreground = colors[0],
+                    #fmt = '\uf017 {}',
                     format = '%H:%M',
                 ),
-                widget.TextBox(
-                    font = 'Font Awesome 5 Free Solid',
-                    fontsize = 18,
-                    padding = 0,
-                    text='\ue0b2',
-                    background = colors[2],
-                    foreground = colors[1],
-                ),
-                widget.CurrentLayout(
-                    background = colors[1],
-                    foreground = colors[8],
-                ),
-                widget.CurrentLayoutIcon(
-                    scale = 0.75,
+                widget.QuickExit( # EXIT
+                    font = my_fonts[2],
+                    background = d_colors[11],
+                    foreground = colors[0],
+                    countdown_format = '{}s',
+                    default_text = '\uf011',
                 ),
                 widget.CheckUpdates(
-                    colour_have_updates = colors[7],
-                    colour_no_updates = colors[0],
-                    background = colors[1],
-                    foreground = colors[0],
-                    mouse_callbacks = {'Button1': lambda qtile: qtile.cmd_spawn(terminal + ' -e sudo pacman -Syu')},
+                    colour_have_updates = colors[9],
+                    colour_no_updates = colors[9],
+                    background = colors[10],
+                    foreground = colors[9],
+                    mouse_callbacks = {'Button1': lambda qtile: qtile.cmd_spawn(terminal + ' -t=float -e sudo pacman -Syyu')},
                     distro = 'Arch',
-                    display_format = '\uf2f1 {updates}',
+                    fmt = '\uf2f1 {}',
+                    display_format = '{updates}',
+                    no_update_string = '0',
                 ),
-                #widget.QuickExit(
-                #    background = colors[1],
-                #    foreground = colors[0],
-                #    countdown_format = '{}s',
-                #    default_text = '\uf011',
-                #    padding = 5,
-                #),
             ],
-            24,
-            opacity = 0.85,
-            margin = [0,0,3,0],
+            28,
+            opacity = 1.0,
+            margin = [0,0,0,0],
         ),
-        left = bar.Gap(3),
-        right = bar.Gap(3),
-        bottom = bar.Gap(3),
+        #left = bar.Gap(3),
+        #right = bar.Gap(3),
+        #bottom = bar.Gap(3),
     ),
 ]
 
@@ -469,11 +446,21 @@ floating_layout = layout.Floating(
         {'wname': 'pinentry'},  # GPG key password entry
         {'wmclass': 'ssh-askpass'},  # ssh-askpass
         {'wmclass': 'galculator'},  # galculator
+        {'wmclass': 'pamac-manager'},  # pamac
         {'wname': 'float'},  # generic floating windows
     ]
 )
 auto_fullscreen = True
-focus_on_window_activation = "smart"
+focus_on_window_activation = "focus"
+
+### MY FUNCTIONS ###
+
+#  AUTOSTART  #
+
+@hook.subscribe.startup_once
+def autostart():
+    home = os.path.expanduser('~/')
+    subprocess.call([home + '.config/qtile/autostart.sh'])
 
 # XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
 # string besides java UI toolkits; you can see several discussions on the
@@ -484,10 +471,3 @@ focus_on_window_activation = "smart"
 # We choose LG3D to maximize irony: it is a 3D non-reparenting WM written in
 # java that happens to be on java's whitelist.
 wmname = "LG3D"
-
-#  AUTOSTART #
-
-@hook.subscribe.startup_once
-def autostart():
-    home = os.path.expanduser('~/.config/qtile/autostart.sh')
-    subprocess.call([home])
