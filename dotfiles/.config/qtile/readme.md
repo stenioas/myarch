@@ -13,7 +13,7 @@
 
 <h1 align="center">Qtile</h1>
 <div align="center">
-  <img alt="Captura de tela" src="https://github.com/stenioasmyarch/blob/master/screenshots/qtile_desktop.png" />
+  <img alt="Captura de tela" src="https://github.com/stenioas/myarch/blob/master/screenshots/qtile_desktop.png" />
   </br></br>
-  <img alt="Captura de tela" src="https://github.com/stenioasmyarch/blob/master/screenshots/qtile_layout.png" />
+  <img alt="Captura de tela" src="https://github.com/stenioas/myarch/blob/master/screenshots/qtile_layout.png" />
 </div>
