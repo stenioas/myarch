@@ -76,7 +76,6 @@ keys = [
         desc="Swap panes of split stack"),
     Key([mod, "shift"], "Return", lazy.layout.toggle_split(),
         desc="Toggle between split and unsplit sides of stack"),
-    Key([mod], "Return", lazy.spawn(terminal), desc="Launch terminal"),
     Key([mod], "Tab", lazy.next_layout(), desc="Toggle between layouts"),
     Key([mod, "shift"], "Tab", lazy.prev_layout(), desc="Toggle between layouts"),
     Key([mod], "w", lazy.window.kill(), desc="Kill focused window"),
@@ -91,6 +90,8 @@ keys = [
     Key([], "Print", lazy.function(screenshot())),
     Key([mod], "Print", lazy.function(screenshot(mode='select'))),
     Key([mod, "shift"], "Print", lazy.function(screenshot(mode='window'))),
+    Key([mod], "Return", lazy.spawn(terminal), desc="Launch terminal"),
+    Key([mod, "shift"], "Return", lazy.spawn(terminal + " -t=float"), desc="Launch terminal"),
     Key([mod], "d", lazy.spawn("rofi -show drun"), desc="Launch rofi"),
     Key([mod], "g", lazy.spawn("google-chrome-stable"), desc="Launch Google Chrome"),
     Key([mod], "t", lazy.spawn("telegram-desktop"), desc="Launch Telegram"),
@@ -186,9 +187,9 @@ layouts = [
         ratio = 1,
         fair = False,
     ),
-    layout.MonadTall(
-        **layout_theme,
-    ),
+    #layout.MonadTall(
+    #    **layout_theme,
+    #),
     # layout.Stack(num_stacks=2),
     # layout.Columns(),
     # layout.Matrix(),
@@ -213,39 +214,34 @@ screens = [
             [
                 widget.TextBox(
                     font = my_fonts[1],
-                    fontsize = 32,
-                    #background = colors[1],
+                    fontsize = 30,
                     foreground = colors[1],
-                    markup = True,
                     text='\uf303',
                     mouse_callbacks = {'Button1': lambda qtile: qtile.cmd_spawn('rofi -show drun')},
                 ),
-                widget.CurrentLayout(
-                    #background = colors[2],
-                    #foreground = colors[0],
-                ),
+                widget.CurrentLayout(),
                 widget.GroupBox(
                     font = my_fonts[6],
                     fontsize = 18,
-                    rounded = True,
+                    rounded = False,
                     borderwidth = 0,
                     margin_y = 3,
                     padding_y = 3,
-                    this_current_screen_border = colors[10],
+                    this_current_screen_border = d_colors[11],
                     urgent_border = colors[15],
                     highlight_method = 'block',
-                    highlight_color = colors[10],
+                    highlight_color = colors[11],
                     block_highlight_text_color = colors[0],
-                    active = colors[10],
+                    active = colors[1],
                     inactive = colors[8],
                     disable_drag = True,
                 ),
                 widget.TaskList(
                     margin_y = 1,
                     padding_y = 5,
-                    rounded = True,
-                    border = colors[10],
-                    unfocused_border = colors[1],
+                    rounded = False,
+                    border = d_colors[11],
+                    unfocused_border = colors[10],
                     foreground = colors[0],
                     highlight_method = 'block',
                     icon_size = 0,
@@ -298,25 +294,18 @@ screens = [
                     mouse_callbacks = {'Button1': lambda qtile: qtile.cmd_spawn(terminal + ' -t=float -e=nmtui')},
                 ),
                 widget.PulseVolume( # VOLUME
-                    #background = d_colors[7],
-                    #foreground = colors[9],
                     fmt = '<span face="' + my_fonts[6] + '" foreground="' + colors[5] + '">\uf028</span> {}',
                 ),
                 widget.Clock( # DATE
-                    #background = d_colors[8],
-                    #foreground = colors[0],
                     fmt = '<span face="' + my_fonts[6] + '" foreground="' + colors[10] + '">\uf073</span> {}',
                     format = '%a.%d.%m',
                 ),
                 widget.Clock( # CLOCK
-                    #background = d_colors[9],
-                    #foreground = colors[0],
                     fmt = '<span face="' + my_fonts[6] + '" foreground="' + colors[2] + '">\uf017</span> {}',
                     format = '%H:%M',
                 ),
                 widget.QuickExit( # EXIT
                     font = my_fonts[2],
-                    #background = d_colors[11],
                     foreground = colors[1],
                     countdown_format = '{}s',
                     default_text = '\uf011',
@@ -378,7 +367,7 @@ floating_layout = layout.Floating(
         {'wmclass': 'ssh-askpass'},  # ssh-askpass
         {'wmclass': 'galculator'},  # galculator
         {'wmclass': 'pamac-manager'},  # pamac
-        {'wmclass': 'Alacritty'},  # alacritty
+        #{'wmclass': 'Alacritty'},  # alacritty
         {'wname': 'float'},  # generic floating windows
     ]
 )
